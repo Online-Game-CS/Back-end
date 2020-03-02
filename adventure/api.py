@@ -11,6 +11,12 @@ import json
 # instantiate pusher
 # pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config('PUSHER_KEY'), secret=config('PUSHER_SECRET'), cluster=config('PUSHER_CLUSTER'))
 
+@api_view(["GET"])
+def welcome(request):
+    content = {'message': 'Welcome to Lambda Mud API'}
+    return JsonResponse(content)
+
+    
 @csrf_exempt
 @api_view(["GET"])
 def initialize(request):
