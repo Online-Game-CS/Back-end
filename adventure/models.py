@@ -48,6 +48,19 @@ class Room(models.Model):
     def __str__(self):
         return f"room {self.i},{self.j}"
 
+    def addConnection(self,grid,rows,cols):
+        i = self.i
+        j = self.j
+
+        if i < rows -1 and grid[i+1][j].wall is False:
+            self.s_to = grid[i+1][j].id
+        if i > 0 and grid[i-1][j].wall is False:
+            self.n_to = grid[i-1][j].id
+        if j < cols - 1 and grid[i][j+1].wall is False:
+            self.e_to = grid[i][j+1].id
+        if j > 0 and grid[i][j-1].wall is False:
+            self.w_to = grid[i][j-1].id
+
 
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

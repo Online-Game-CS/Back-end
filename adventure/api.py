@@ -33,6 +33,15 @@ def start(request):
             grid[i][j] = Room(i=i,j=j)
             grid[i][j].save()
 
+    # grid[0][1].wall = True
+    # grid[0][1].save()
+
+    for i in range(0,rows):
+        for j in range(0, cols):
+            if grid[i][j].wall is False:
+                grid[i][j].addConnection(grid,rows,cols)
+                grid[i][j].save()
+
     content = {'message': 'Rooms created'}
     return JsonResponse(content)
 
