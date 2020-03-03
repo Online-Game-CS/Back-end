@@ -5,5 +5,7 @@ urlpatterns = [
     url('init', api.initialize),
     url('move', api.move),
     url('say', api.say),
-    url('welcome', api.welcome)
+    url('welcome', api.welcome),
+    url('getrooms', api.get_rooms),
+    url('start', api.start)
 ]
