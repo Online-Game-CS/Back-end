@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from .models import *
 from rest_framework.decorators import api_view
 import json
+from .serializers import RoomSerializer
+from rest_framework import status
 
 # instantiate pusher
 # pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config('PUSHER_KEY'), secret=config('PUSHER_SECRET'), cluster=config('PUSHER_CLUSTER'))
@@ -15,6 +17,39 @@ import json
 def welcome(request):
     content = {'message': 'Welcome to Lambda Mud API'}
     return JsonResponse(content)
+
+@api_view(["GET"])
+def start(request):
+    rows = 5
+    cols = 5
+
+    grid = [None] * rows
+
+    for i in range(0,rows):
+        grid[i] = [None] * cols
+
+    for i in range(0,rows):
+        for j in range(0, cols):
+            grid[i][j] = Room(i=i,j=j)
+            grid[i][j].save()
+
+    # grid[0][1].wall = True
+    # grid[0][1].save()
+
+    for i in range(0,rows):
+        for j in range(0, cols):
+            if grid[i][j].wall is False:
+                grid[i][j].addConnection(grid,rows,cols)
+                grid[i][j].save()
+
+    content = {'message': 'Rooms created'}
+    return JsonResponse(content)
+
+@api_view(["GET"])
+def get_rooms(request):
+    rooms = Room.objects.all()
+    serializer = RoomSerializer(rooms, many=True)
+    return JsonResponse({'rooms': serializer.data}, safe=False, status=status.HTTP_200_OK) 
 
     
 @csrf_exempt
