@@ -37,6 +37,8 @@ import uuid
 #         return [p.uuid for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
 
 class Room(models.Model):
+    title = models.CharField(max_length=50, default="DEFAULT TITLE")
+    description = models.CharField(max_length=500, default="DEFAULT DESCRIPTION")
     i = models.IntegerField(default=0)
     j = models.IntegerField(default=0)
     n_to = models.IntegerField(default=0)
@@ -60,6 +62,12 @@ class Room(models.Model):
             self.e_to = grid[i][j+1].id
         if j > 0 and grid[i][j-1].wall is False:
             self.w_to = grid[i][j-1].id
+    
+    def playerNames(self, currentPlayerID):
+        return [p.user.username for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
+
+    def playerUUIDs(self, currentPlayerID):
+        return [p.uuid for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
 
 
 class Player(models.Model):
