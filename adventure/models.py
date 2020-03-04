@@ -37,8 +37,8 @@ import uuid
 #         return [p.uuid for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
 
 class Room(models.Model):
-    title = models.CharField(max_length=50, default="DEFAULT TITLE")
-    description = models.CharField(max_length=500, default="DEFAULT DESCRIPTION")
+    title = models.CharField(max_length=50, default="Walkway")
+    description = models.CharField(max_length=500, default="Use these paths to move around")
     i = models.IntegerField(default=0)
     j = models.IntegerField(default=0)
     n_to = models.IntegerField(default=0)
@@ -46,6 +46,8 @@ class Room(models.Model):
     e_to = models.IntegerField(default=0)
     w_to = models.IntegerField(default=0)
     wall = models.BooleanField(default=False)
+    bee = models.BooleanField(default=False)
+    question = models.IntegerField(default=0)
 
     def __str__(self):
         return f"room {self.i},{self.j}"
@@ -62,7 +64,7 @@ class Room(models.Model):
             self.e_to = grid[i][j+1].id
         if j > 0 and grid[i][j-1].wall is False:
             self.w_to = grid[i][j-1].id
-    
+         
     def playerNames(self, currentPlayerID):
         return [p.user.username for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
 
@@ -74,6 +76,7 @@ class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     currentRoom = models.IntegerField(default=0)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
+    score = models.IntegerField(default=0)
     def __str__(self):
         return f"Player {self.user}"
 
@@ -87,6 +90,11 @@ class Player(models.Model):
         except Room.DoesNotExist:
             self.initialize()
             return self.room()
+    
+    def updateScore(self):
+        self.score += 1
+        self.save()
+        return self.score
 
 @receiver(post_save, sender=User)
 def create_user_player(sender, instance, created, **kwargs):
