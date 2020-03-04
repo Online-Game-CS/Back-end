@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 import json
 from .serializers import RoomSerializer
 from rest_framework import status
+from random import randint
 
 # instantiate pusher
 # pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config('PUSHER_KEY'), secret=config('PUSHER_SECRET'), cluster=config('PUSHER_CLUSTER'))
@@ -21,8 +22,10 @@ def welcome(request):
 
 @api_view(["GET"])
 def start(request):
+    # delete existing rooms
     Room.objects.all().delete()
 
+    # create new 10 * 10 matrice
     rows = 10
     cols = 10
 
@@ -31,23 +34,49 @@ def start(request):
     for i in range(0,rows):
         grid[i] = [None] * cols
 
+    # create a room for each matrice index and save to db
     for i in range(0,rows):
         for j in range(0, cols):
             grid[i][j] = Room(i=i,j=j)
+            # generate random walls
+            if (randint(0,10)< 3):
+                grid[i][j].wall = True
+                grid[i][j].title = "Wall"
+                grid[i][j].description = "Partition"
             grid[i][j].save()
 
-
-    grid[0][0].title = "First Room"
+    # change title of first room
+    grid[0][0].title = "Starting Point"
+    grid[0][0].description = "Your journey begins here"
+    grid[0][0].wall = False
     grid[0][0].save()
-    grid[0][1].bee = True
-    grid[0][0].title = "1"
-    grid[0][1].save()
 
+    # create walls
+    wall_positions = [(0,1), (3,0)]
+    for i in wall_positions:
+        grid[i[0]][i[1]].wall = True
+        grid[i[0]][i[1]].title = "Wall"
+        grid[i[0]][i[1]].description = "Partition"
+        grid[i[0]][i[1]].save()
+
+    # connect all rooms in matrice
     for i in range(0,rows):
         for j in range(0, cols):
             if grid[i][j].wall is False:
                 grid[i][j].addConnection(grid,rows,cols)
                 grid[i][j].save()
+
+    # change rooms to bees
+    bee_positions = [(0,2), (1,8), (2,3), (3,0)]
+    count = 1
+    for i in bee_positions:
+        grid[i[0]][i[1]].wall = False
+        grid[i[0]][i[1]].bee = True
+        grid[i[0]][i[1]].question = count
+        grid[i[0]][i[1]].title = f"Challenge {count}"
+        grid[i[0]][i[1]].description = "Help Beyoncé solve this problem"
+        grid[i[0]][i[1]].save()
+        count += 1
 
     content = {'message': 'Rooms created'}
     return JsonResponse(content)
@@ -67,10 +96,21 @@ def initialize(request):
     player = user.player
     player_id = player.id
     uuid = player.uuid
+    score = player.score
     room = player.room()
     players = room.playerNames(player_id)
-    return JsonResponse({'uuid': uuid, 'name':player.user.username, 'title':room.title, 'description':room.description, 'players':players}, safe=True)
+    return JsonResponse({'uuid': uuid, 'name':player.user.username, 'title':room.title, 'description':room.description, 'score':score, 'players':players}, safe=True)
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def complete_challenge(request):
+    player = request.user.player
+    player_id = player.id
+    room = player.room()
+    score = player.updateScore()
+    print("score", score, player.score)
+    players = room.playerNames(player_id)
+    return JsonResponse({'name':player.user.username, 'title':room.title, 'score':score, 'players':players}, safe=True)
 
 # @csrf_exempt
 @api_view(["POST"])
