@@ -5,7 +5,8 @@ from django.http import JsonResponse
 from decouple import config
 from django.contrib.auth.models import User
 from .models import *
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 import json
 from .serializers import RoomSerializer
 from rest_framework import status
@@ -20,8 +21,10 @@ def welcome(request):
 
 @api_view(["GET"])
 def start(request):
-    rows = 5
-    cols = 5
+    Room.objects.all().delete()
+
+    rows = 10
+    cols = 10
 
     grid = [None] * rows
 
@@ -33,8 +36,12 @@ def start(request):
             grid[i][j] = Room(i=i,j=j)
             grid[i][j].save()
 
-    # grid[0][1].wall = True
-    # grid[0][1].save()
+
+    grid[0][0].title = "First Room"
+    grid[0][0].save()
+    grid[0][1].bee = True
+    grid[0][0].title = "1"
+    grid[0][1].save()
 
     for i in range(0,rows):
         for j in range(0, cols):
@@ -54,6 +61,7 @@ def get_rooms(request):
     
 @csrf_exempt
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def initialize(request):
     user = request.user
     player = user.player
@@ -66,6 +74,7 @@ def initialize(request):
 
 # @csrf_exempt
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def move(request):
     dirs={"n": "north", "s": "south", "e": "east", "w": "west"}
     reverse_dirs = {"n": "south", "s": "north", "e": "west", "w": "east"}
