@@ -82,7 +82,8 @@ class Player(models.Model):
 
     def initialize(self):
         if self.currentRoom == 0:
-            self.currentRoom = Room.objects.first().id
+            room = Room.objects.get(title='Starting Point')
+            self.currentRoom = room.id
             self.save()
     def room(self):
         try:

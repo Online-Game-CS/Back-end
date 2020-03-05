@@ -52,7 +52,7 @@ def start(request):
     grid[0][0].save()
 
     # create walls
-    wall_positions = [(0,1), (3,0)]
+    wall_positions = [(0,1)]
     for i in wall_positions:
         grid[i[0]][i[1]].wall = True
         grid[i[0]][i[1]].title = "Wall"
@@ -67,7 +67,7 @@ def start(request):
                 grid[i][j].save()
 
     # change rooms to bees
-    bee_positions = [(0,2), (1,8), (2,3), (3,0)]
+    bee_positions = [(0,2), (3,0), (2,3), (6,2), (9,1), (9,5), (4,6), (1,7), (5,4), (7,9)]
     count = 1
     for i in bee_positions:
         grid[i[0]][i[1]].wall = False
