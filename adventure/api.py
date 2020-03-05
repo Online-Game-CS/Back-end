@@ -45,12 +45,6 @@ def start(request):
                 grid[i][j].description = "Partition"
             grid[i][j].save()
 
-    # change title of first room
-    grid[0][0].title = "Starting Point"
-    grid[0][0].description = "Your journey begins here"
-    grid[0][0].wall = False
-    grid[0][0].save()
-
     # create walls
     wall_positions = [(0,1)]
     for i in wall_positions:
@@ -59,12 +53,11 @@ def start(request):
         grid[i[0]][i[1]].description = "Partition"
         grid[i[0]][i[1]].save()
 
-    # connect all rooms in matrice
-    for i in range(0,rows):
-        for j in range(0, cols):
-            if grid[i][j].wall is False:
-                grid[i][j].addConnection(grid,rows,cols)
-                grid[i][j].save()
+    # change title of first room
+    grid[0][0].title = "Starting Point"
+    grid[0][0].description = "Your journey begins here"
+    grid[0][0].wall = False
+    grid[0][0].save()
 
     # change rooms to bees
     bee_positions = [(0,2), (3,0), (2,3), (6,2), (9,1), (9,5), (4,6), (1,7), (5,4), (7,9)]
@@ -77,6 +70,13 @@ def start(request):
         grid[i[0]][i[1]].description = "Help Beyoncé solve this problem"
         grid[i[0]][i[1]].save()
         count += 1
+
+    # connect all rooms in matrice
+    for i in range(0,rows):
+        for j in range(0, cols):
+            if grid[i][j].wall is False:
+                grid[i][j].addConnection(grid,rows,cols)
+                grid[i][j].save()
 
     content = {'message': 'Rooms created'}
     return JsonResponse(content)
